@@ -10,6 +10,8 @@ Limits change often. Treat numbers below as guidance and verify on each provider
 ## Contents
 
 - [Ongoing free API tiers](#ongoing-free-api-tiers)
+- [Embeddings (free / freemium)](#embeddings-free--freemium)
+- [Speech: STT & TTS](#speech-stt--tts)
 - [Limited / trial access](#limited--trial-access)
 - [Aggregators & routers](#aggregators--routers)
 - [Local / self-hosted (no cloud bill)](#local--self-hosted-no-cloud-bill)
@@ -30,6 +32,38 @@ Providers with a renewing free allowance (rate-limited).
 | **Cloudflare Workers AI** | 10,000 Neurons/day | No | Neuron budget depends on model & output length | [Docs](https://developers.cloudflare.com/workers-ai/) · [Pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/) |
 | **OpenRouter (`:free`)** | 25+ free models; ~50 req/day (higher after spend) | No | Unified OpenAI-compatible API; free models use `:free` suffix | [Models](https://openrouter.ai/models?q=free) · [Pricing](https://openrouter.ai/pricing) |
 | **SambaNova Cloud** | Small daily free quota on selected models | No | Low RPD on free tier — fine for experiments | [Cloud](https://cloud.sambanova.ai/) |
+
+---
+
+## Embeddings (free / freemium)
+
+Vector / embedding endpoints useful for RAG and search.
+
+| Provider | Free highlight | Card needed? | Notes | Links |
+| --- | --- | --- | --- | --- |
+| **Google Gemini Embeddings** | `gemini-embedding-001` (and related) on Gemini free tier | No | Same free-tier / data-use caveats as Gemini chat | [Embeddings guide](https://ai.google.dev/gemini-api/docs/embeddings) · [Pricing](https://ai.google.dev/gemini-api/docs/pricing) |
+| **Cloudflare Workers AI** | Embedding models share the 10K Neurons/day pool | No | e.g. `@cf/baai/bge-*` family; high RPM on embeddings | [Models](https://developers.cloudflare.com/workers-ai/models/) |
+| **Jina AI** | Free API key with rate limits | No | Embeddings + reranker APIs | [jina.ai](https://jina.ai/) · [API](https://api.jina.ai/) |
+| **Cohere Embed** | Available on trial keys | No | Trial ≠ production/commercial | [Embed docs](https://docs.cohere.com/docs/embeddings) |
+| **Twelve Labs Marengo** | Free-plan multimodal embed (video/audio/image/text) | No | Separate video-index minute caps | [Docs](https://docs.twelvelabs.io/) |
+
+---
+
+## Speech: STT & TTS
+
+Speech-to-text and text-to-speech with a free path.
+
+| Provider | Type | Free highlight | Card needed? | Notes | Links |
+| --- | --- | --- | --- | --- | --- |
+| **Groq Whisper** | STT | ~20 RPM / high daily audio-seconds quota on Whisper models | No | OpenAI-compatible audio transcription | [Groq console](https://console.groq.com/) · [Speech docs](https://console.groq.com/docs/speech-to-text) |
+| **Google Gemini** | TTS (+ multimodal audio) | Free-tier TTS / audio models in AI Studio | No | Quotas vary by model; check console | [Gemini API](https://ai.google.dev/gemini-api/docs) |
+| **Cloudflare Workers AI** | STT / TTS / media | Covered by Neurons/day allocation | No | Whisper-class & other speech models at the edge | [Workers AI models](https://developers.cloudflare.com/workers-ai/models/) |
+| **ElevenLabs** | TTS | ~10k credits/month on Free plan | No | Credit ≈ short monthly TTS budget; commercial limits on free | [Pricing](https://elevenlabs.io/pricing) |
+| **Deepgram** | STT + TTS | ~$200 signup credit (often no card, no expiry) | No* | Nova STT + Aura TTS; then pay-as-you-go | [Pricing](https://deepgram.com/pricing) |
+| **AssemblyAI** | STT | ~$50 signup credit | No* | Pre-recorded + streaming; LLM gateway usually excluded | [Pricing](https://www.assemblyai.com/pricing) |
+| **OVHcloud AI Endpoints** | TTS | Listed free NVIDIA Riva voices (and other free endpoints) | No | Anonymous RPM is low; keyed access is higher | [AI Endpoints](https://endpoints.ai.cloud.ovh.net/) |
+
+\*Signup credit — not an unlimited renewing free tier.
 
 ---
 
@@ -118,6 +152,23 @@ curl https://api.groq.com/openai/v1/chat/completions \
 curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$GEMINI_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"contents":[{"parts":[{"text":"Hello!"}]}]}'
+```
+
+### Gemini embeddings
+
+```bash
+curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=$GEMINI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"models/gemini-embedding-001","content":{"parts":[{"text":"Hello embeddings"}]}}'
+```
+
+### Groq Whisper (speech → text)
+
+```bash
+curl https://api.groq.com/openai/v1/audio/transcriptions \
+  -H "Authorization: Bearer $GROQ_API_KEY" \
+  -F file="@audio.mp3" \
+  -F model="whisper-large-v3"
 ```
 
 ---
